@@ -1,0 +1,3 @@
+Integration tests belong here.
+
+Import `createApp` from `src/app.ts` so the HTTP server in `src/server.ts` is not started. Point `DATABASE_URL` at a dedicated test database before running them.
