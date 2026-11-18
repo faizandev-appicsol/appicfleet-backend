@@ -20,7 +20,11 @@ export function setRefreshCookie(res: Response, token: string, expiresAt: Date):
 }
 
 export function clearRefreshCookie(res: Response): void {
-  res.clearCookie(REFRESH_COOKIE_NAME, cookieOptions())
+  res.clearCookie(REFRESH_COOKIE_NAME, {
+    ...cookieOptions(),
+    expires: new Date(0),
+    maxAge: 0,
+  })
 }
 
 export function readRefreshCookie(cookies: unknown): string | undefined {

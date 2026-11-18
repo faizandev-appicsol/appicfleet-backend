@@ -1,8 +1,9 @@
 import { Types } from 'mongoose'
-import { ROLES, toPublicRole, USER_STATUSES, type Role } from '../../constants/roles.js'
+import { toPublicRole, USER_STATUSES, type Role } from '../../constants/roles.js'
 import { AppError } from '../../exceptions/AppError.js'
 import { ERROR_CODES } from '../../exceptions/errorCodes.js'
-import { hashPassword, dummyPasswordHash, verifyPassword } from '../../lib/password/index.js'
+import { dummyPasswordHash, verifyPassword } from '../../lib/password/index.js'
+import jwt from 'jsonwebtoken'
 import {
   signAccessToken,
   signRefreshToken,
@@ -11,22 +12,17 @@ import {
 } from '../../lib/jwt/index.js'
 import {
   revokeAllRefreshTokens,
-  revokePresentedRefreshToken,
   rotateRefreshToken,
   saveRefreshToken,
 } from '../../repositories/auth/refresh-token.repository.js'
-import {
-  createUser,
-  findCredentialsByEmail,
-  findUserById,
-} from '../../repositories/users/user.repository.js'
+import { findCredentialsByEmail, findUserById } from '../../repositories/users/user.repository.js'
 import type {
   AuthenticatedUser,
   IssuedSession,
   PublicSession,
   SessionUser,
 } from '../../types/auth.js'
-import type { LoginBody, RegisterBody } from '../../validations/auth.validation.js'
+import type { LoginBody } from '../../validations/auth.validation.js'
 
 function toSessionUser(account: {
   id: string
@@ -73,17 +69,6 @@ async function issueSession(account: {
     refreshExpiresAt: refresh.expiresAt,
     user: toSessionUser(account),
   }
-}
-
-export async function register(input: RegisterBody): Promise<IssuedSession> {
-  const account = await createUser({
-    email: input.email.toLowerCase(),
-    name: input.name.trim(),
-    passwordHash: await hashPassword(input.password),
-    role: ROLES.VIEWER,
-    status: USER_STATUSES.ACTIVE,
-  })
-  return issueSession(account)
 }
 
 export async function login(input: LoginBody): Promise<IssuedSession> {
@@ -157,19 +142,26 @@ export async function refresh(refreshToken: string): Promise<IssuedSession> {
   }
 }
 
+function readRefreshUserId(refreshToken: string): string | null {
+  try {
+    return verifyRefreshToken(refreshToken).sub
+  } catch {
+    const decoded = jwt.decode(refreshToken)
+    if (typeof decoded === 'object' && decoded !== null && typeof decoded.sub === 'string') {
+      return decoded.sub
+    }
+    return null
+  }
+}
+
 export async function logout(refreshToken: string | undefined): Promise<void> {
   if (!refreshToken) return
 
-  try {
-    const claims = verifyRefreshToken(refreshToken)
-    await revokePresentedRefreshToken({
-      jti: claims.jti,
-      userId: claims.sub,
-      presentedToken: refreshToken,
-    })
-  } catch {
-    // An expired or malformed token is still cleared by the controller.
-  }
+  const userId = readRefreshUserId(refreshToken)
+  if (!userId) return
+
+  // Sign-out ends every refresh session for this account, not only the current token.
+  await revokeAllRefreshTokens(userId)
 }
 
 export function currentSessionUser(account: AuthenticatedUser): SessionUser {

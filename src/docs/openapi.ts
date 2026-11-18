@@ -23,7 +23,6 @@ export const openApiDocument = {
         responses: { '200': { description: 'API process is running' } },
       },
     },
-    '/auth/register': { post: { summary: 'Create an account and start a session' } },
     '/auth/login': { post: { summary: 'Start a session' } },
     '/auth/logout': { post: { summary: 'Revoke the refresh token and clear its cookie' } },
     '/auth/refresh': { post: { summary: 'Rotate the refresh token and issue an access token' } },

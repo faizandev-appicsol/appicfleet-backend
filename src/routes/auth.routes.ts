@@ -7,18 +7,12 @@ import {
   logoutHandler,
   meHandler,
   refreshHandler,
-  registerHandler,
 } from '../controllers/auth/auth.controller.js'
-import {
-  loginBodySchema,
-  refreshBodySchema,
-  registerBodySchema,
-} from '../validations/auth.validation.js'
+import { loginBodySchema, refreshBodySchema } from '../validations/auth.validation.js'
 
 export const authRouter = Router()
 
 authRouter.use(authRateLimiter)
-authRouter.post('/register', validate({ body: registerBodySchema }), registerHandler)
 authRouter.post('/login', validate({ body: loginBodySchema }), loginHandler)
 authRouter.post('/logout', validate({ body: refreshBodySchema }), logoutHandler)
 authRouter.post('/refresh', validate({ body: refreshBodySchema }), refreshHandler)

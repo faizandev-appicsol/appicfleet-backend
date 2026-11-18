@@ -9,19 +9,11 @@ import {
   login,
   logout,
   refresh,
-  register,
   toPublicSession,
 } from '../../services/auth/auth.service.js'
 import type { ValidatedRequest } from '../../types/http.js'
 import { asyncHandler } from '../../utils/asyncHandler.js'
-import type { LoginBody, RefreshBody, RegisterBody } from '../../validations/auth.validation.js'
-
-export const registerHandler = asyncHandler(async (req, res) => {
-  const { body } = getValidated<ValidatedRequest<RegisterBody>>(req)
-  const session = await register(body)
-  setRefreshCookie(res, session.refreshToken, session.refreshExpiresAt)
-  sendSuccess(res, 'Account created successfully.', toPublicSession(session), 201)
-})
+import type { LoginBody, RefreshBody } from '../../validations/auth.validation.js'
 
 export const loginHandler = asyncHandler(async (req, res) => {
   const { body } = getValidated<ValidatedRequest<LoginBody>>(req)

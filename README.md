@@ -26,7 +26,7 @@ npm run db:seed
 
 Copy `.env.example` to `.env` before the first run. The API listens on `http://localhost:3000`. It still starts when MongoDB is down. `GET /api/v1/health` then returns HTTP 200 with `"database": "down"`.
 
-`MONGODB_URI` accepts a local URL (`mongodb://127.0.0.1:27017/fleet_management`) or an Atlas URL (`mongodb+srv://`). `npm run db:seed` creates an active administrator only when both `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` are set. It does not print the password, and it does not replace an account that already exists.
+`MONGODB_URI` accepts a local URL (`mongodb://127.0.0.1:27017/appicfleet`) or an Atlas URL (`mongodb+srv://`). `npm run db:seed` creates an active administrator only when both `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` are set. It does not print the password, and it does not replace an account that already exists.
 
 Set the console to `VITE_API_URL=http://localhost:3000/api/v1`.
 
@@ -63,7 +63,7 @@ Validation errors also include `errors`, a map of field names to message arrays.
 
 ## Authentication
 
-`POST /api/v1/auth/register` creates an active viewer. `POST /api/v1/auth/login` checks the password with bcrypt. Both return an access token and set an HttpOnly `fleet_refresh` cookie on `/api/v1/auth`. Refresh tokens rotate, are stored only as a SHA-256 hash, and are revoked on logout. Reuse of a revoked refresh token revokes that account's remaining refresh tokens.
+`POST /api/v1/auth/login` checks the password with bcrypt, returns an access token, and sets an HttpOnly `fleet_refresh` cookie on `/api/v1/auth`. Refresh tokens rotate, are stored only as a SHA-256 hash, and are revoked on logout. Reuse of a revoked refresh token revokes that account's remaining refresh tokens.
 
 `authenticate` verifies the bearer token and reloads the account. `requireRole` and `requirePermission` authorize the request. User routes use `users:read` and `users:write`, which belong to `ADMIN` and `MANAGER`.
 
