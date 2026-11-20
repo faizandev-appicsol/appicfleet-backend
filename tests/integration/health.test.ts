@@ -13,7 +13,7 @@ describe('HTTP API', () => {
       }),
   )
 
-  it('reports process health even when MongoDB is down', async () => {
+  it('reports process liveness without requiring MongoDB', async () => {
     const address = server.address()
     if (!address || typeof address === 'string') throw new Error('Test server has no port')
     const { port } = address as AddressInfo
@@ -21,13 +21,12 @@ describe('HTTP API', () => {
     const response = await fetch(`http://127.0.0.1:${port}/api/v1/health`)
     const body = (await response.json()) as {
       success: boolean
-      data: { status: string; database: string }
+      data: { status: string }
     }
 
     assert.equal(response.status, 200)
     assert.equal(body.success, true)
     assert.equal(body.data.status, 'ok')
-    assert.ok(body.data.database === 'up' || body.data.database === 'down')
   })
 
   it('rejects an empty login body', async () => {

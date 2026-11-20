@@ -2,7 +2,7 @@
   "name": "fleet-management-api",
   "private": true,
   "version": "0.1.0",
-  "description": "Fleet Management HTTP API",
+  "description": "Appic Fleet HTTP API",
   "type": "module",
   "engines": {
     "node": ">=20.19"
@@ -17,9 +17,13 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
+    "db:migrate": "tsx src/database/migrations/cli.ts up",
+    "db:migrate:down": "tsx src/database/migrations/cli.ts down",
+    "db:migrate:status": "tsx src/database/migrations/cli.ts status",
     "db:seed": "tsx src/database/seed.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1173.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",

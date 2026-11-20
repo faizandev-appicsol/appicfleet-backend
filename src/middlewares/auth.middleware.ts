@@ -1,13 +1,17 @@
 import type { RequestHandler } from 'express'
 import { z } from 'zod'
-import type { Permission } from '../constants/permissions.js'
-import { roleHasPermission } from '../constants/permissions.js'
+import type { PermissionInput } from '../constants/permissions.js'
 import type { Role } from '../constants/roles.js'
 import { USER_STATUSES } from '../constants/roles.js'
 import { AppError } from '../exceptions/AppError.js'
 import { ERROR_CODES } from '../exceptions/errorCodes.js'
 import { TokenError, verifyAccessToken } from '../lib/jwt/index.js'
 import { findUserById } from '../repositories/users/user.repository.js'
+import {
+  hasPermission,
+  loadAccessContextForUser,
+} from '../services/authorization/authorization.service.js'
+import type { AccessContext } from '../types/access.js'
 import type { AuthenticatedUser } from '../types/auth.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
 
@@ -19,6 +23,11 @@ function readBearerToken(header: string): string {
   return header.replace(/^Bearer\s+/i, '').trim()
 }
 
+/**
+ * Verifies the bearer token, reloads the account from the database, and attaches both
+ * `req.user` and the freshly resolved `req.access` (permissions and tenant scope).
+ * The token only identifies the user: role, status and scope always come from the database.
+ */
 export const authenticate: RequestHandler = asyncHandler(async (req, _res, next) => {
   const parsed = authorizationSchema.safeParse({ authorization: req.header('authorization') })
   if (!parsed.success) {
@@ -40,6 +49,7 @@ export const authenticate: RequestHandler = asyncHandler(async (req, _res, next)
     throw new AppError('Authentication is required.', 401, ERROR_CODES.UNAUTHENTICATED)
   }
 
+  req.access = await loadAccessContextForUser(user)
   req.user = user
   next()
 })
@@ -51,6 +61,17 @@ export function requireUser(req: { user?: AuthenticatedUser }): AuthenticatedUse
   return req.user
 }
 
+export function requireAccess(req: { access?: AccessContext }): AccessContext {
+  if (!req.access) {
+    throw new AppError('Authentication is required.', 401, ERROR_CODES.UNAUTHENTICATED)
+  }
+  return req.access
+}
+
+/**
+ * Prefer `requirePermission` on routes. Role names are a coarse gate only; they do not carry
+ * tenant scope and custom roles never match.
+ */
 export function requireRole(...roles: Role[]): RequestHandler {
   return (req, _res, next) => {
     if (!req.user) {
@@ -65,13 +86,14 @@ export function requireRole(...roles: Role[]): RequestHandler {
   }
 }
 
-export function requirePermission(permission: Permission): RequestHandler {
+/** Default deny: passes only when the resolved access context holds the permission. */
+export function requirePermission(permission: PermissionInput): RequestHandler {
   return (req, _res, next) => {
-    if (!req.user) {
+    if (!req.user || !req.access) {
       next(new AppError('Authentication is required.', 401, ERROR_CODES.UNAUTHENTICATED))
       return
     }
-    if (!roleHasPermission(req.user.role, permission)) {
+    if (!hasPermission(req.access, permission)) {
       next(new AppError('You do not have permission to do that.', 403, ERROR_CODES.FORBIDDEN))
       return
     }

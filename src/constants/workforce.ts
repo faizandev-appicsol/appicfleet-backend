@@ -1,0 +1,120 @@
+/** Module 18 — Attendance, Leave & Workforce Scheduling. Stored UPPERCASE. */
+
+export const WEEKDAY_CODES = {
+  MON: 'MON',
+  TUE: 'TUE',
+  WED: 'WED',
+  THU: 'THU',
+  FRI: 'FRI',
+  SAT: 'SAT',
+  SUN: 'SUN',
+} as const
+export type WeekdayCode = (typeof WEEKDAY_CODES)[keyof typeof WEEKDAY_CODES]
+
+export const ENTITY_ACTIVE_STATUSES = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+} as const
+
+export const ATTENDANCE_STATUSES = {
+  PRESENT: 'PRESENT',
+  ABSENT: 'ABSENT',
+  LATE: 'LATE',
+  EARLY_LEAVE: 'EARLY_LEAVE',
+  HALF_DAY: 'HALF_DAY',
+  ON_LEAVE: 'ON_LEAVE',
+  HOLIDAY: 'HOLIDAY',
+  WEEKEND: 'WEEKEND',
+  REST_DAY: 'REST_DAY',
+  MISSING_CLOCK_IN: 'MISSING_CLOCK_IN',
+  MISSING_CLOCK_OUT: 'MISSING_CLOCK_OUT',
+} as const
+export type AttendanceStatus = (typeof ATTENDANCE_STATUSES)[keyof typeof ATTENDANCE_STATUSES]
+
+export const ATTENDANCE_SOURCES = {
+  MANUAL: 'MANUAL',
+  EMPLOYEE: 'EMPLOYEE',
+  ADMIN: 'ADMIN',
+  IMPORT: 'IMPORT',
+  DEVICE: 'DEVICE',
+  BIOMETRIC: 'BIOMETRIC',
+  INTEGRATION: 'INTEGRATION',
+  SYSTEM: 'SYSTEM',
+} as const
+export type AttendanceSource = (typeof ATTENDANCE_SOURCES)[keyof typeof ATTENDANCE_SOURCES]
+
+export const CORRECTION_STATUSES = {
+  REQUESTED: 'REQUESTED',
+  UNDER_REVIEW: 'UNDER_REVIEW',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  CANCELLED: 'CANCELLED',
+} as const
+export type CorrectionStatus = (typeof CORRECTION_STATUSES)[keyof typeof CORRECTION_STATUSES]
+
+export const ATTENDANCE_EXCEPTION_CODES = {
+  MISSING_CLOCK_IN: 'MISSING_CLOCK_IN',
+  MISSING_CLOCK_OUT: 'MISSING_CLOCK_OUT',
+  UNEXPECTED_ATTENDANCE: 'UNEXPECTED_ATTENDANCE',
+  EXCESSIVE_OVERTIME: 'EXCESSIVE_OVERTIME',
+  SCHEDULE_MISMATCH: 'SCHEDULE_MISMATCH',
+  DUPLICATE_ATTENDANCE: 'DUPLICATE_ATTENDANCE',
+} as const
+
+export const LEAVE_REQUEST_STATUSES = {
+  DRAFT: 'DRAFT',
+  SUBMITTED: 'SUBMITTED',
+  UNDER_REVIEW: 'UNDER_REVIEW',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  CANCELLED: 'CANCELLED',
+} as const
+export type LeaveRequestStatus = (typeof LEAVE_REQUEST_STATUSES)[keyof typeof LEAVE_REQUEST_STATUSES]
+
+export const LEAVE_DAY_PARTS = {
+  FULL_DAY: 'FULL_DAY',
+  HALF_DAY_AM: 'HALF_DAY_AM',
+  HALF_DAY_PM: 'HALF_DAY_PM',
+  PARTIAL_HOURS: 'PARTIAL_HOURS',
+} as const
+export type LeaveDayPart = (typeof LEAVE_DAY_PARTS)[keyof typeof LEAVE_DAY_PARTS]
+
+export const LEAVE_BALANCE_TX_TYPES = {
+  OPENING: 'OPENING',
+  ACCRUAL: 'ACCRUAL',
+  USAGE: 'USAGE',
+  ADJUSTMENT: 'ADJUSTMENT',
+  CARRY_FORWARD: 'CARRY_FORWARD',
+  EXPIRY: 'EXPIRY',
+  REVERSAL: 'REVERSAL',
+  PENDING: 'PENDING',
+  PENDING_RELEASE: 'PENDING_RELEASE',
+} as const
+export type LeaveBalanceTxType = (typeof LEAVE_BALANCE_TX_TYPES)[keyof typeof LEAVE_BALANCE_TX_TYPES]
+
+export const LEAVE_ACCRUAL_METHODS = {
+  ANNUAL: 'ANNUAL',
+  MONTHLY: 'MONTHLY',
+  NONE: 'NONE',
+} as const
+
+export const OVERTIME_REQUEST_STATUSES = {
+  DRAFT: 'DRAFT',
+  PENDING_APPROVAL: 'PENDING_APPROVAL',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  CANCELLED: 'CANCELLED',
+} as const
+
+export const BREAK_TYPES = {
+  LUNCH: 'LUNCH',
+  PRAYER: 'PRAYER',
+  PERSONAL: 'PERSONAL',
+  OTHER: 'OTHER',
+} as const
+
+export const DEFAULT_WORKFORCE_TIMEZONE = 'Asia/Dubai'
+export const DEFAULT_GRACE_MINUTES = 15
+
+/** Decimal-safe day units stored as strings with up to 2 decimal places (e.g. "2.00"). */
+export const LEAVE_DAYS_REGEX = /^\d{1,5}(\.\d{1,2})?$/

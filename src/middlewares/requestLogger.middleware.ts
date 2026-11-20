@@ -7,6 +7,10 @@ export const requestLogger: RequestHandler = (req, res, next) => {
   res.on('finish', () => {
     const path = req.originalUrl.split('?')[0] ?? req.path
     const meta = {
+      module: 'http',
+      operation: 'request',
+      requestId: req.requestId,
+      correlationId: req.correlationId,
       method: req.method,
       path,
       status: res.statusCode,

@@ -2,9 +2,21 @@ import { app } from './app.js'
 import { connectDatabase, disconnectDatabase } from './config/database.js'
 import { env } from './config/env.js'
 import { logger } from './lib/logger/index.js'
+import { registerBookingJobs } from './services/bookings/hold-expiry.js'
+import { startScheduler } from './services/jobs/scheduler.js'
+import { registerRecruitmentJobs } from './services/recruitment/recruitment-jobs.js'
+
+registerBookingJobs()
+registerRecruitmentJobs()
+startScheduler()
 
 const server = app.listen(env.port, () => {
-  logger.info('API listening', { port: env.port, environment: env.nodeEnv })
+  logger.info('API listening', {
+    module: 'server',
+    service: env.appName,
+    port: env.port,
+    environment: env.nodeEnv,
+  })
 })
 
 connectDatabase().catch((error: unknown) => {

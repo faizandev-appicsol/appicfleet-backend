@@ -3,12 +3,17 @@ import { authenticate } from '../middlewares/auth.middleware.js'
 import { authRateLimiter } from '../middlewares/rateLimit.middleware.js'
 import { validate } from '../middlewares/validation.middleware.js'
 import {
+  changePasswordHandler,
   loginHandler,
   logoutHandler,
   meHandler,
   refreshHandler,
 } from '../controllers/auth/auth.controller.js'
-import { loginBodySchema, refreshBodySchema } from '../validations/auth.validation.js'
+import {
+  changePasswordBodySchema,
+  loginBodySchema,
+  refreshBodySchema,
+} from '../validations/auth.validation.js'
 
 export const authRouter = Router()
 
@@ -17,3 +22,9 @@ authRouter.post('/login', validate({ body: loginBodySchema }), loginHandler)
 authRouter.post('/logout', validate({ body: refreshBodySchema }), logoutHandler)
 authRouter.post('/refresh', validate({ body: refreshBodySchema }), refreshHandler)
 authRouter.get('/me', authenticate, meHandler)
+authRouter.post(
+  '/change-password',
+  authenticate,
+  validate({ body: changePasswordBodySchema }),
+  changePasswordHandler,
+)

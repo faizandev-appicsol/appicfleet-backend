@@ -1,8 +1,13 @@
+import { getRequestMeta } from '../../helpers/requestMeta.js'
 import { sendSuccess } from '../../helpers/response.js'
-import { requireUser } from '../../middlewares/auth.middleware.js'
+import { requireAccess } from '../../middlewares/auth.middleware.js'
 import { getValidated } from '../../middlewares/validation.middleware.js'
 import {
+  activateUser,
+  assignUserBranches,
+  assignUserRoles,
   changeUser,
+  deactivateUser,
   getUser,
   inviteUser,
   listUserDirectory,
@@ -11,39 +16,67 @@ import {
 import type { ValidatedRequest } from '../../types/http.js'
 import { asyncHandler } from '../../utils/asyncHandler.js'
 import type {
+  AssignBranchesBody,
+  AssignRolesBody,
   CreateUserBody,
+  DeactivateUserBody,
   ListUsersQuery,
   UpdateUserBody,
   UserIdParams,
 } from '../../validations/user.validation.js'
 
+type IdRequest<TBody = unknown> = ValidatedRequest<TBody, unknown, UserIdParams>
+
 export const listUsersHandler = asyncHandler(async (req, res) => {
   const { query } = getValidated<ValidatedRequest<unknown, ListUsersQuery>>(req)
-  const result = await listUserDirectory(query)
+  const result = await listUserDirectory(requireAccess(req), query)
   sendSuccess(res, 'Users retrieved successfully.', result)
 })
 
 export const getUserHandler = asyncHandler(async (req, res) => {
-  const { params } = getValidated<ValidatedRequest<unknown, unknown, UserIdParams>>(req)
-  const user = await getUser(params.id)
+  const { params } = getValidated<IdRequest>(req)
+  const user = await getUser(requireAccess(req), params.id)
   sendSuccess(res, 'User retrieved successfully.', user)
 })
 
 export const createUserHandler = asyncHandler(async (req, res) => {
   const { body } = getValidated<ValidatedRequest<CreateUserBody>>(req)
-  const user = await inviteUser(requireUser(req), body)
+  const user = await inviteUser(requireAccess(req), body, getRequestMeta(req))
   sendSuccess(res, 'User invited successfully.', user, 201)
 })
 
 export const updateUserHandler = asyncHandler(async (req, res) => {
-  const { body, params } =
-    getValidated<ValidatedRequest<UpdateUserBody, unknown, UserIdParams>>(req)
-  const user = await changeUser(requireUser(req), params.id, body)
+  const { body, params } = getValidated<IdRequest<UpdateUserBody>>(req)
+  const user = await changeUser(requireAccess(req), params.id, body, getRequestMeta(req))
   sendSuccess(res, 'User updated successfully.', user)
 })
 
+export const activateUserHandler = asyncHandler(async (req, res) => {
+  const { params } = getValidated<IdRequest>(req)
+  const user = await activateUser(requireAccess(req), params.id, getRequestMeta(req))
+  sendSuccess(res, 'User activated successfully.', user)
+})
+
+export const deactivateUserHandler = asyncHandler(async (req, res) => {
+  const { body, params } = getValidated<IdRequest<DeactivateUserBody>>(req)
+  const user = await deactivateUser(requireAccess(req), params.id, body, getRequestMeta(req))
+  sendSuccess(res, 'User deactivated successfully.', user)
+})
+
+export const assignUserBranchesHandler = asyncHandler(async (req, res) => {
+  const { body, params } = getValidated<IdRequest<AssignBranchesBody>>(req)
+  const user = await assignUserBranches(requireAccess(req), params.id, body, getRequestMeta(req))
+  sendSuccess(res, 'Branch access updated successfully.', user)
+})
+
+export const assignUserRolesHandler = asyncHandler(async (req, res) => {
+  const { body, params } = getValidated<IdRequest<AssignRolesBody>>(req)
+  const user = await assignUserRoles(requireAccess(req), params.id, body, getRequestMeta(req))
+  sendSuccess(res, 'Roles updated successfully.', user)
+})
+
 export const deleteUserHandler = asyncHandler(async (req, res) => {
-  const { params } = getValidated<ValidatedRequest<unknown, unknown, UserIdParams>>(req)
-  await removeUser(requireUser(req), params.id)
+  const { params } = getValidated<IdRequest>(req)
+  await removeUser(requireAccess(req), params.id, getRequestMeta(req))
   sendSuccess(res, 'User deleted successfully.', null)
 })

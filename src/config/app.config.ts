@@ -1,6 +1,6 @@
 export const appConfig = {
-  name: 'Fleet Management API',
-  service: 'fleet-management-api',
+  name: 'Appic Fleet API',
+  service: 'appic-fleet-api',
   apiPrefix: '/api/v1',
   bodyLimit: '100kb',
   apiRateLimit: {
